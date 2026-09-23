@@ -22,20 +22,20 @@
 
 | 文件 | 说明 |
 | ---- | ---- |
-| [IDEAS.md](./IDEAS.md) | **想法**全文初稿。定稿后禁止修改。 |
-| [CORRECTIONS.md](./CORRECTIONS.md) | **修正与增量**：调整旧想法，或追加全新想法；只增不减，条目带日期。 |
-| [MVP.md](./MVP.md) | **第一版范围**：必须做 / 不做 / 完成定义；与 IDEAS 冲突时以本文件为准做第一版。 |
+| [docs/IDEAS.md](./docs/IDEAS.md) | **想法**全文初稿。定稿后禁止修改。 |
+| [docs/CORRECTIONS.md](./docs/CORRECTIONS.md) | **修正与增量**：调整旧想法，或追加全新想法；只增不减，条目带日期。 |
+| [docs/MVP.md](./docs/MVP.md) | **第一版范围**：必须做 / 不做 / 完成定义；与 IDEAS 冲突时以本文件为准做第一版。 |
 | [docs/mvp-steps.md](./docs/mvp-steps.md) | **实现步骤**：按能力点拆分的顺序与验收（仅指导 `mvp` 分支）。 |
 | [docs/art/](./docs/art/) | 概念图与美术提示词 |
 
 
-阅读顺序：`IDEAS.md`（愿景）→ `MVP.md`（做什么）→ `docs/mvp-steps.md`（按什么顺序做）→ `CORRECTIONS.md`（增量）。
+阅读顺序：`docs/IDEAS.md`（愿景）→ `docs/MVP.md`（做什么）→ `docs/mvp-steps.md`（按什么顺序做）→ `docs/CORRECTIONS.md`（增量）。
 
 ## 分支约定
 
 - **`master`：** 设计与文档基线（保持干净）。
 - **`mvp`：** 能力与玩法验证沙盒；**不合回 `master`**。
-- 暂不设 **`develop`**。细则见 [CORRECTIONS.md](./CORRECTIONS.md)（2026-09-23 条目）。
+- 暂不设 **`develop`**。细则见 [docs/CORRECTIONS.md](./docs/CORRECTIONS.md)（2026-09-23 条目）。
 
 ## 开发（`mvp`）
 
