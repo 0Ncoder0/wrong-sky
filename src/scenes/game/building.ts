@@ -6,6 +6,16 @@ const ROOF = "#d5ddd8";
 const DOOR = "#3a3530";
 const OUTLINE = "#1a1814";
 
+export const BUILDING_COLORS = {
+  leftWall: LEFT_WALL,
+  rightWall: RIGHT_WALL,
+  roof: ROOF,
+  door: DOOR,
+  outline: OUTLINE
+};
+
+export type BuildingColors = typeof BUILDING_COLORS;
+
 type Point = { x: number; y: number };
 
 /** 占一块矩形地的盒子。墙高决定它能挡住人的多少，门在朝左的那面墙上。 */
@@ -34,105 +44,106 @@ export class Building {
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
-    const ground = this.footprint();
-    const raised = ground.map(point => ({ x: point.x, y: point.y - this.wallH }));
-    const south = this.bottom(this.tx + this.tilesW - 1, this.ty + this.tilesH - 1);
+    BuildingRenderer.render(ctx, this.tx, this.ty, this.tilesW, this.tilesH, this.wallH, BUILDING_COLORS);
+  }
+}
+
+/** 按后角格子、占地和墙高画一栋房子。左右墙、顶、门、轮廓的颜色由调用方给。 */
+export class BuildingRenderer {
+  public static render(ctx: CanvasRenderingContext2D, tx: number, ty: number, tilesW: number, tilesH: number, wallH: number, colors: BuildingColors): void {
+    const ground = this.footprint(tx, ty, tilesW, tilesH);
+    const raised = ground.map(point => ({ x: point.x, y: point.y - wallH }));
+    const south = this.bottom(tx + tilesW - 1, ty + tilesH - 1);
     let doorEdge: [Point, Point] = null;
     let passedSouth = false;
 
     for (let i = 0; i < ground.length; i++) {
       const a = ground[i];
       const b = ground[(i + 1) % ground.length];
-      if (same(a, south)) passedSouth = true;
+      if (this.same(a, south)) passedSouth = true;
       if (a.x <= b.x) continue;
-      this.face(ctx, a, b, { x: b.x, y: b.y - this.wallH }, { x: a.x, y: a.y - this.wallH }, passedSouth ? LEFT_WALL : RIGHT_WALL);
+      this.polygon(ctx, [a, b, { x: b.x, y: b.y - wallH }, { x: a.x, y: a.y - wallH }], passedSouth ? colors.leftWall : colors.rightWall, colors.outline);
       if (passedSouth && doorEdge == null) doorEdge = [a, b];
     }
 
-    this.polygon(ctx, raised, ROOF);
-    if (doorEdge) this.door(ctx, doorEdge[0], doorEdge[1]);
+    this.polygon(ctx, raised, colors.roof, colors.outline);
+    if (doorEdge) this.door(ctx, doorEdge[0], doorEdge[1], tilesW, wallH, colors.door, colors.outline);
   }
 
-  private footprint(): Point[] {
-    const tx0 = this.tx;
-    const ty0 = this.ty;
-    const tx1 = this.tx + this.tilesW - 1;
-    const ty1 = this.ty + this.tilesH - 1;
-    const points = [this.top(tx0, ty0), this.right(tx1, ty0), this.right(tx1, ty1), this.bottom(tx1, ty1), this.left(tx0, ty1), this.left(tx0, ty0)];
+  private static footprint(tx: number, ty: number, tilesW: number, tilesH: number): Point[] {
+    const tx1 = tx + tilesW - 1;
+    const ty1 = ty + tilesH - 1;
+    const points = [this.top(tx, ty), this.right(tx1, ty), this.right(tx1, ty1), this.bottom(tx1, ty1), this.left(tx, ty1), this.left(tx, ty)];
     const unique: Point[] = [];
     for (const point of points) {
       const prev = unique[unique.length - 1];
-      if (prev && same(prev, point)) continue;
+      if (prev && this.same(prev, point)) continue;
       unique.push(point);
     }
-    if (unique.length > 1 && same(unique[0], unique[unique.length - 1])) unique.pop();
-    return dropCollinear(unique);
+    if (unique.length > 1 && this.same(unique[0], unique[unique.length - 1])) unique.pop();
+    return this.dropCollinear(unique);
   }
 
-  private top(tx: number, ty: number): Point {
+  private static top(tx: number, ty: number): Point {
     return {
       x: ORIGIN_X + (tx - ty) * (TILE_W / 2),
       y: ORIGIN_Y + (tx + ty) * (TILE_H / 2)
     };
   }
 
-  private right(tx: number, ty: number): Point {
-    const top = this.top(tx, ty);
-    return { x: top.x + TILE_W / 2, y: top.y + TILE_H / 2 };
+  private static right(tx: number, ty: number): Point {
+    const point = this.top(tx, ty);
+    return { x: point.x + TILE_W / 2, y: point.y + TILE_H / 2 };
   }
 
-  private bottom(tx: number, ty: number): Point {
-    const top = this.top(tx, ty);
-    return { x: top.x, y: top.y + TILE_H };
+  private static bottom(tx: number, ty: number): Point {
+    const point = this.top(tx, ty);
+    return { x: point.x, y: point.y + TILE_H };
   }
 
-  private left(tx: number, ty: number): Point {
-    const top = this.top(tx, ty);
-    return { x: top.x - TILE_W / 2, y: top.y + TILE_H / 2 };
+  private static left(tx: number, ty: number): Point {
+    const point = this.top(tx, ty);
+    return { x: point.x - TILE_W / 2, y: point.y + TILE_H / 2 };
   }
 
-  private face(ctx: CanvasRenderingContext2D, a: Point, b: Point, c: Point, d: Point, color: string): void {
-    this.polygon(ctx, [a, b, c, d], color);
-  }
-
-  private polygon(ctx: CanvasRenderingContext2D, points: Point[], color: string): void {
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = OUTLINE;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  }
-
-  private door(ctx: CanvasRenderingContext2D, a: Point, b: Point): void {
-    const doorH = Math.min(14, this.wallH * 0.45);
-    const width = 0.36 / this.tilesW;
+  private static door(ctx: CanvasRenderingContext2D, a: Point, b: Point, tilesW: number, wallH: number, color: string, outline: string): void {
+    const doorH = Math.min(14, wallH * 0.45);
+    const width = 0.36 / tilesW;
     const u0 = 0.5 - width / 2;
     const u1 = 0.5 + width / 2;
     const at = (u: number, v: number) => ({
       x: a.x + (b.x - a.x) * u,
       y: a.y + (b.y - a.y) * u - v
     });
-    this.face(ctx, at(u0, 2), at(u1, 2), at(u1, 2 + doorH), at(u0, 2 + doorH), DOOR);
+    this.polygon(ctx, [at(u0, 2), at(u1, 2), at(u1, 2 + doorH), at(u0, 2 + doorH)], color, outline);
   }
-}
 
-function same(a: Point, b: Point): boolean {
-  return a.x === b.x && a.y === b.y;
-}
-
-function dropCollinear(points: Point[]): Point[] {
-  if (points.length < 3) return points;
-  const kept: Point[] = [];
-  for (let i = 0; i < points.length; i++) {
-    const prev = points[(i + points.length - 1) % points.length];
-    const curr = points[i];
-    const next = points[(i + 1) % points.length];
-    const cross = (curr.x - prev.x) * (next.y - curr.y) - (curr.y - prev.y) * (next.x - curr.x);
-    if (cross !== 0) kept.push(curr);
+  private static polygon(ctx: CanvasRenderingContext2D, points: Point[], color: string, outline: string): void {
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = outline;
+    ctx.lineWidth = 1;
+    ctx.stroke();
   }
-  return kept;
+
+  private static same(a: Point, b: Point): boolean {
+    return a.x === b.x && a.y === b.y;
+  }
+
+  private static dropCollinear(points: Point[]): Point[] {
+    if (points.length < 3) return points;
+    const kept: Point[] = [];
+    for (let i = 0; i < points.length; i++) {
+      const prev = points[(i + points.length - 1) % points.length];
+      const curr = points[i];
+      const next = points[(i + 1) % points.length];
+      const cross = (curr.x - prev.x) * (next.y - curr.y) - (curr.y - prev.y) * (next.x - curr.x);
+      if (cross !== 0) kept.push(curr);
+    }
+    return kept;
+  }
 }
