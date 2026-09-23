@@ -18,7 +18,7 @@ export class Game {
     this.canvas = canvas;
     this.ctx = ctx;
     this.pointer = new PointerInput(canvas);
-    this.director = new SceneDirector((id) => new scenes[id](), "title");
+    this.director = new SceneDirector((id) => new scenes[id](), "game");
     this.configureCanvas();
     window.addEventListener("resize", () => this.configureCanvas());
   }
