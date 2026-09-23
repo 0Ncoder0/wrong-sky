@@ -22,6 +22,9 @@ export class GameScene implements Scene {
   public update(dt: number, input: InputFrame): void {
     this.player.update(dt, input.keyboard, this.tiles, this.buildings);
     this.ghost.follow(tileAt(input.pointer.x, input.pointer.y), this.tiles, this.buildings, this.player);
+    if (!input.pointer.pressed) return;
+    const placed = this.ghost.commit();
+    if (placed) this.buildings.push(placed);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

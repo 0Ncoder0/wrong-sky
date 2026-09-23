@@ -1,4 +1,4 @@
-import type { Building } from "./building.ts";
+import { Building } from "./building.ts";
 import type { Player } from "./player.ts";
 import { isLand, ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W, type Terrain } from "./map.ts";
 
@@ -36,6 +36,13 @@ export class GhostBuilding {
 
   public isShown(): boolean {
     return this.shown;
+  }
+
+  /** 合法时放下同尺寸的实体房子。红色或不在地图上时什么也不做。 */
+  public commit(): Building | null {
+    if (!this.shown || !this.ok) return null;
+    this.ok = false;
+    return new Building(this.tx, this.ty, TILES_W, TILES_H, WALL_H);
   }
 
   /** 靠画面前的那一角。和实体建筑用同一个深度。 */
