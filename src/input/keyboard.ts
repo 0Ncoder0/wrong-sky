@@ -10,6 +10,8 @@ export interface KeyboardState {
   KeyA: KeyEdge;
   KeyS: KeyEdge;
   KeyD: KeyEdge;
+  KeyB: KeyEdge;
+  KeyR: KeyEdge;
 }
 
 class KeyEdgeState {
@@ -27,13 +29,15 @@ class KeyEdgeState {
   }
 }
 
-/** 物理键位上的 WASD。按住留给移动，按下和抬起只活一帧。 */
+/** 物理键位上的 WASD、B 和 R。按住留给移动，按下和抬起只活一帧。 */
 export class KeyboardInput {
   private readonly keys: Record<keyof KeyboardState, KeyEdgeState> = {
     KeyW: new KeyEdgeState(),
     KeyA: new KeyEdgeState(),
     KeyS: new KeyEdgeState(),
-    KeyD: new KeyEdgeState()
+    KeyD: new KeyEdgeState(),
+    KeyB: new KeyEdgeState(),
+    KeyR: new KeyEdgeState()
   };
 
   public constructor() {
@@ -47,7 +51,9 @@ export class KeyboardInput {
       KeyW: this.keys.KeyW.copy(),
       KeyA: this.keys.KeyA.copy(),
       KeyS: this.keys.KeyS.copy(),
-      KeyD: this.keys.KeyD.copy()
+      KeyD: this.keys.KeyD.copy(),
+      KeyB: this.keys.KeyB.copy(),
+      KeyR: this.keys.KeyR.copy()
     };
   }
 
@@ -56,8 +62,8 @@ export class KeyboardInput {
   }
 
   private down(event: KeyboardEvent): void {
-    const key = this.slot(event.code);
-    if (!key) return;
+    if (!(event.code in this.keys)) return;
+    const key = this.keys[event.code as keyof KeyboardState];
     event.preventDefault();
     if (event.repeat || key.held) return;
     key.held = true;
@@ -65,8 +71,9 @@ export class KeyboardInput {
   }
 
   private up(event: KeyboardEvent): void {
-    const key = this.slot(event.code);
-    if (!key || !key.held) return;
+    if (!(event.code in this.keys)) return;
+    const key = this.keys[event.code as keyof KeyboardState];
+    if (!key.held) return;
     event.preventDefault();
     key.held = false;
     key.released = true;
@@ -78,10 +85,5 @@ export class KeyboardInput {
       key.held = false;
       key.released = true;
     }
-  }
-
-  private slot(code: string): KeyEdgeState | null {
-    if (code !== "KeyW" && code !== "KeyA" && code !== "KeyS" && code !== "KeyD") return null;
-    return this.keys[code];
   }
 }

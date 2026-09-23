@@ -16,6 +16,15 @@ export const BUILDING_COLORS = {
 
 export type BuildingColors = typeof BUILDING_COLORS;
 
+const DEMOLISH = "#c43c3c";
+const DEMOLISH_COLORS: BuildingColors = {
+  leftWall: DEMOLISH,
+  rightWall: DEMOLISH,
+  roof: DEMOLISH,
+  door: DEMOLISH,
+  outline: BUILDING_COLORS.outline
+};
+
 type Point = { x: number; y: number };
 
 /** 占一块矩形地的盒子。墙高决定它能挡住人的多少，门在朝左的那面墙上。 */
@@ -25,6 +34,8 @@ export class Building {
   private readonly tilesW: number;
   private readonly tilesH: number;
   private readonly wallH: number;
+  /** 删除工具悬停在占地里时为 true，整栋用红色画。 */
+  public removing = false;
 
   public constructor(tx: number, ty: number, tilesW: number, tilesH: number, wallH: number) {
     this.tx = tx;
@@ -44,7 +55,8 @@ export class Building {
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
-    BuildingRenderer.render(ctx, this.tx, this.ty, this.tilesW, this.tilesH, this.wallH, BUILDING_COLORS);
+    const colors = this.removing ? DEMOLISH_COLORS : BUILDING_COLORS;
+    BuildingRenderer.render(ctx, this.tx, this.ty, this.tilesW, this.tilesH, this.wallH, colors);
   }
 }
 
