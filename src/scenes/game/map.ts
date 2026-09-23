@@ -10,6 +10,8 @@ export const SEA_DEPTH = 2;
 export const SEA_COLOR = "#4e8d98";
 export const LAND_COLOR = "#b7a47a";
 export const GRID_COLOR = "#8e8a80";
+/** 悬停格叠在地砖上。陆地和海都要能看出来。 */
+export const HOVER_COLOR = "rgba(255, 236, 180, 0.45)";
 
 const MAP_PX_H = MAP_SIZE * TILE_H;
 
@@ -44,6 +46,18 @@ export function forEachTile(visit: (tx: number, ty: number) => void): void {
     const txEnd = Math.min(sum, MAP_SIZE - 1);
     for (let tx = txStart; tx <= txEnd; tx++) visit(tx, sum - tx);
   }
+}
+
+/** 屏幕点落在哪一格。原点是 (0,0) 的上顶点；地图外返回 null。 */
+export function tileAt(x: number, y: number): { tx: number; ty: number } | null {
+  const halfW = TILE_W / 2;
+  const halfH = TILE_H / 2;
+  const rx = x - ORIGIN_X;
+  const ry = y - ORIGIN_Y;
+  const tx = Math.floor((ry / halfH + rx / halfW) / 2);
+  const ty = Math.floor((ry / halfH - rx / halfW) / 2);
+  if (tx < 0 || ty < 0 || tx >= MAP_SIZE || ty >= MAP_SIZE) return null;
+  return { tx, ty };
 }
 
 export function traceDiamond(ctx: CanvasRenderingContext2D, tx: number, ty: number): void {

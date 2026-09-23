@@ -27,6 +27,10 @@ export class PointerInput {
     canvas.addEventListener("pointermove", event => {
       this.track(canvas, event);
     });
+    canvas.addEventListener("pointerleave", () => {
+      this.x = -1;
+      this.y = -1;
+    });
   }
 
   public snapshot(): PointerState {
