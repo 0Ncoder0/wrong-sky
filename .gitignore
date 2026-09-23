@@ -1,6 +1,7 @@
 # Dependencies & build
 node_modules/
 dist/
+.vite/
 
 # OS / editor
 .DS_Store
