@@ -6,37 +6,42 @@ const BODY_H = 20;
 const HEAD_R = 5;
 const STEP_INTERVAL = 0.16;
 
-/** 站在格子中心。WASD 按屏幕方向换格，含斜向；海和地图外不进入。 */
+/** 格子中心之间匀速走。当前这段走完才响应新的方向。 */
 export class Player {
   public readonly id = "player";
   public tx = 16;
   public ty = 16;
-  private stepTimer = 0;
+  private to: { tx: number; ty: number } = null;
+  private moveT = 0;
 
-  /** 平地不挡人。以后有更高的东西时，按这个数决定谁盖住谁。 */
+  /** 用插值后的位置。平地不挡人，以后建筑按这个数决定谁盖住谁。 */
   public depth(): number {
-    return this.tx + this.ty;
+    const tile = this.drawTile();
+    return tile.tx + tile.ty;
   }
 
   public update(dt: number, keyboard: KeyboardState, tiles: Terrain[][]): void {
-    const move = this.direction(keyboard);
-    if (!move) {
-      this.stepTimer = 0;
-      return;
+    if (this.to == null) {
+      this.to = this.next(keyboard, tiles);
+      this.moveT = 0;
     }
-    this.stepTimer -= dt;
-    if (this.stepTimer > 0) return;
-    this.stepTimer = STEP_INTERVAL;
-    const tx = this.tx + move.tx;
-    const ty = this.ty + move.ty;
-    if (!isLand(tiles, tx, ty)) return;
-    this.tx = tx;
-    this.ty = ty;
+    if (this.to == null) return;
+
+    this.moveT += dt / STEP_INTERVAL;
+    if (this.moveT < 1) return;
+
+    const extra = (this.moveT - 1) * STEP_INTERVAL;
+    this.tx = this.to.tx;
+    this.ty = this.to.ty;
+    this.to = null;
+    this.moveT = 0;
+    this.update(extra, keyboard, tiles);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
-    const footX = ORIGIN_X + (this.tx - this.ty) * (TILE_W / 2);
-    const footY = ORIGIN_Y + (this.tx + this.ty) * (TILE_H / 2) + TILE_H / 2;
+    const tile = this.drawTile();
+    const footX = ORIGIN_X + (tile.tx - tile.ty) * (TILE_W / 2);
+    const footY = ORIGIN_Y + (tile.tx + tile.ty) * (TILE_H / 2) + TILE_H / 2;
     const bodyTop = footY - BODY_H;
 
     ctx.fillStyle = "#c4564a";
@@ -52,6 +57,24 @@ export class Player {
     ctx.beginPath();
     ctx.arc(footX, bodyTop - HEAD_R + 1, HEAD_R, 0, Math.PI * 2);
     ctx.stroke();
+  }
+
+  private drawTile(): { tx: number; ty: number } {
+    if (!this.to) return { tx: this.tx, ty: this.ty };
+    const t = Math.min(this.moveT, 1);
+    return {
+      tx: this.tx + (this.to.tx - this.tx) * t,
+      ty: this.ty + (this.to.ty - this.ty) * t,
+    };
+  }
+
+  private next(keyboard: KeyboardState, tiles: Terrain[][]): { tx: number; ty: number } {
+    const move = this.direction(keyboard);
+    if (!move) return null;
+    const tx = this.tx + move.tx;
+    const ty = this.ty + move.ty;
+    if (!isLand(tiles, tx, ty)) return null;
+    return { tx, ty };
   }
 
   /**
