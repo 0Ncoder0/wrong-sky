@@ -1,4 +1,5 @@
 import type { KeyboardState } from "../../input/keyboard.ts";
+import type { PointerState } from "../../input/pointer.ts";
 import type { Building } from "./building.ts";
 import { ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W, type TileMap } from "./tile-map.ts";
 
@@ -27,7 +28,7 @@ export class Player {
   }
 
   /** 脚下清掉。海上、房子上、地图外保持原目标。 */
-  public setGoal(tile: { tx: number; ty: number } | null, map: TileMap, buildings: Building[]): void {
+  private setGoal(tile: { tx: number; ty: number } | null, map: TileMap, buildings: Building[]): void {
     if (tile == null) return;
     if (tile.tx === this.tx && tile.ty === this.ty) {
       this.goal = null;
@@ -38,7 +39,9 @@ export class Player {
     this.goal = tile;
   }
 
-  public update(dt: number, keyboard: KeyboardState, map: TileMap, buildings: Building[]): void {
+  public update(dt: number, keyboard: KeyboardState, pointer: PointerState, map: TileMap, buildings: Building[]): void {
+    if (pointer.right.pressed) this.setGoal(map.tileAt(pointer.x, pointer.y), map, buildings);
+    if (this.direction(keyboard)) this.goal = null;
     if (this.to == null) {
       this.to = this.next(keyboard, map, buildings);
       this.moveT = 0;
@@ -53,7 +56,8 @@ export class Player {
     this.ty = this.to.ty;
     this.to = null;
     this.moveT = 0;
-    this.update(extra, keyboard, map, buildings);
+    const rest = { ...pointer, right: { ...pointer.right, pressed: false } };
+    this.update(extra, keyboard, rest, map, buildings);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
@@ -73,12 +77,26 @@ export class Player {
 
   private next(keyboard: KeyboardState, map: TileMap, buildings: Building[]): { tx: number; ty: number } {
     const move = this.direction(keyboard);
-    if (!move) return null;
-    const tx = this.tx + move.tx;
-    const ty = this.ty + move.ty;
-    if (!map.isLand(tx, ty)) return null;
-    if (buildings.some(building => building.occupies(tx, ty))) return null;
-    return { tx, ty };
+    if (move) {
+      const tx = this.tx + move.tx;
+      const ty = this.ty + move.ty;
+      if (!Pathfinder.canStep(tx, ty, map, buildings)) return null;
+      return { tx, ty };
+    }
+    return this.towardGoal(map, buildings);
+  }
+
+  /** 没有路就停下。寻路本身在 Pathfinder。 */
+  private towardGoal(map: TileMap, buildings: Building[]): { tx: number; ty: number } | null {
+    const goal = this.goal;
+    if (goal == null) return null;
+    if (this.tx === goal.tx && this.ty === goal.ty) {
+      this.goal = null;
+      return null;
+    }
+    const step = Pathfinder.firstStep({ tx: this.tx, ty: this.ty }, goal, map, buildings);
+    if (step == null) this.goal = null;
+    return step;
   }
 
   /**
@@ -100,6 +118,52 @@ export class Player {
     if (left) return { tx: -1, ty: 1 };
     if (right) return { tx: 1, ty: -1 };
     return null;
+  }
+}
+
+type Tile = { tx: number; ty: number };
+
+/** 八向等代价。给出最短路的第一步；到不了就是 null。 */
+class Pathfinder {
+  public static firstStep(from: Tile, goal: Tile, map: TileMap, buildings: Building[]): Tile | null {
+    if (from.tx === goal.tx && from.ty === goal.ty) return null;
+
+    const queue: { tx: number; ty: number; first: Tile | null }[] = [{ tx: from.tx, ty: from.ty, first: null }];
+    const seen = new Set<string>([`${from.tx},${from.ty}`]);
+    for (let i = 0; i < queue.length; i++) {
+      const current = queue[i];
+      for (const step of this.neighbors(current.tx, current.ty, goal)) {
+        const key = `${step.tx},${step.ty}`;
+        if (seen.has(key) || !this.canStep(step.tx, step.ty, map, buildings)) continue;
+        seen.add(key);
+        const first = current.first ?? step;
+        if (step.tx === goal.tx && step.ty === goal.ty) return first;
+        queue.push({ tx: step.tx, ty: step.ty, first });
+      }
+    }
+    return null;
+  }
+
+  public static canStep(tx: number, ty: number, map: TileMap, buildings: Building[]): boolean {
+    if (!map.isLand(tx, ty)) return false;
+    return !buildings.some(building => building.occupies(tx, ty));
+  }
+
+  /** 先试更靠近目标的相邻格，空地上就会沿直线走。 */
+  private static neighbors(tx: number, ty: number, goal: Tile): Tile[] {
+    const cells: Tile[] = [];
+    for (let nx = tx - 1; nx <= tx + 1; nx++) {
+      for (let ny = ty - 1; ny <= ty + 1; ny++) {
+        if (nx !== tx || ny !== ty) cells.push({ tx: nx, ty: ny });
+      }
+    }
+    cells.sort((a, b) => {
+      const da = Math.max(Math.abs(a.tx - goal.tx), Math.abs(a.ty - goal.ty));
+      const db = Math.max(Math.abs(b.tx - goal.tx), Math.abs(b.ty - goal.ty));
+      if (da !== db) return da - db;
+      return Math.abs(a.tx - goal.tx) + Math.abs(a.ty - goal.ty) - (Math.abs(b.tx - goal.tx) + Math.abs(b.ty - goal.ty));
+    });
+    return cells;
   }
 }
 

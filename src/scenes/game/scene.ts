@@ -31,17 +31,11 @@ export class GameScene implements Scene {
     if (input.keyboard.KeyB.pressed) this.tool = this.tool === "build" ? null : "build";
     if (input.keyboard.KeyR.pressed) this.tool = this.tool === "remove" ? null : "remove";
 
-    this.player.update(dt, input.keyboard, this.map, this.buildings);
-    this.onMove(input);
+    this.player.update(dt, input.keyboard, input.pointer, this.map, this.buildings);
     if (this.tool === "build") this.onBuild(input);
     else this.ghost = null;
     if (this.tool === "remove") this.onRemove(input);
     else this.clearRemoving();
-  }
-
-  private onMove(input: InputFrame): void {
-    if (!input.pointer.right.pressed) return;
-    this.player.setGoal(this.map.tileAt(input.pointer.x, input.pointer.y), this.map, this.buildings);
   }
 
   private onBuild(input: InputFrame): void {
