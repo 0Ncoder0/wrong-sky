@@ -1,6 +1,6 @@
 import type { KeyboardState } from "../../input/keyboard.ts";
 import type { Building } from "./building.ts";
-import { isLand, ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W, type Terrain } from "./map.ts";
+import { ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W, type TileMap } from "./tile-map.ts";
 
 const BODY_W = 10;
 const BODY_H = 20;
@@ -27,9 +27,9 @@ export class Player {
     return tile.tx + tile.ty;
   }
 
-  public update(dt: number, keyboard: KeyboardState, tiles: Terrain[][], buildings: Building[]): void {
+  public update(dt: number, keyboard: KeyboardState, map: TileMap, buildings: Building[]): void {
     if (this.to == null) {
-      this.to = this.next(keyboard, tiles, buildings);
+      this.to = this.next(keyboard, map, buildings);
       this.moveT = 0;
     }
     if (this.to == null) return;
@@ -42,7 +42,7 @@ export class Player {
     this.ty = this.to.ty;
     this.to = null;
     this.moveT = 0;
-    this.update(extra, keyboard, tiles, buildings);
+    this.update(extra, keyboard, map, buildings);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
@@ -75,12 +75,12 @@ export class Player {
     };
   }
 
-  private next(keyboard: KeyboardState, tiles: Terrain[][], buildings: Building[]): { tx: number; ty: number } {
+  private next(keyboard: KeyboardState, map: TileMap, buildings: Building[]): { tx: number; ty: number } {
     const move = this.direction(keyboard);
     if (!move) return null;
     const tx = this.tx + move.tx;
     const ty = this.ty + move.ty;
-    if (!isLand(tiles, tx, ty)) return null;
+    if (!map.isLand(tx, ty)) return null;
     if (buildings.some(building => building.occupies(tx, ty))) return null;
     return { tx, ty };
   }

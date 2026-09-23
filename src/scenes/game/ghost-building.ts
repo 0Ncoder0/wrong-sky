@@ -1,6 +1,6 @@
 import { Building } from "./building.ts";
 import type { Player } from "./player.ts";
-import { isLand, ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W, type Terrain } from "./map.ts";
+import { ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W, type TileMap } from "./tile-map.ts";
 
 const LEFT_WALL = "#5e6a72";
 const RIGHT_WALL = "#8d9aa1";
@@ -23,7 +23,7 @@ export class GhostBuilding {
   private shown = false;
   private ok = false;
 
-  public follow(tile: { tx: number; ty: number } | null, tiles: Terrain[][], buildings: Building[], player: Player): void {
+  public follow(tile: { tx: number; ty: number } | null, map: TileMap, buildings: Building[], player: Player): void {
     if (tile == null) {
       this.shown = false;
       return;
@@ -31,7 +31,7 @@ export class GhostBuilding {
     this.tx = tile.tx;
     this.ty = tile.ty;
     this.shown = true;
-    this.ok = this.canPlace(tiles, buildings, player);
+    this.ok = this.canPlace(map, buildings, player);
   }
 
   public isShown(): boolean {
@@ -58,10 +58,10 @@ export class GhostBuilding {
     ctx.restore();
   }
 
-  private canPlace(tiles: Terrain[][], buildings: Building[], player: Player): boolean {
+  private canPlace(map: TileMap, buildings: Building[], player: Player): boolean {
     for (let ty = this.ty; ty < this.ty + TILES_H; ty++) {
       for (let tx = this.tx; tx < this.tx + TILES_W; tx++) {
-        if (!isLand(tiles, tx, ty)) return false;
+        if (!map.isLand(tx, ty)) return false;
         if (buildings.some(building => building.occupies(tx, ty))) return false;
         if (player.occupies(tx, ty)) return false;
       }

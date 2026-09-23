@@ -1,4 +1,4 @@
-import { ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W } from "./map.ts";
+import { ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W } from "./tile-map.ts";
 
 const LEFT_WALL = "#5e6a72";
 const RIGHT_WALL = "#8d9aa1";
