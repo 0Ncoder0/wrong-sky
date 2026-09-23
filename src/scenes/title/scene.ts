@@ -1,14 +1,15 @@
 import type { InputFrame, Scene, SceneHost } from "../../scene.ts";
+import type { PointerState } from "../../input/pointer.ts";
 import { VIEW_H, VIEW_W } from "../../view.ts";
 
 const BUTTON = { x: (VIEW_W - 270) / 2, y: 321, w: 270, h: 68 };
 
-function pointerInside(input: InputFrame): boolean {
+function pointerInside(pointer: PointerState): boolean {
   return (
-    input.pointerX >= BUTTON.x &&
-    input.pointerX < BUTTON.x + BUTTON.w &&
-    input.pointerY >= BUTTON.y &&
-    input.pointerY < BUTTON.y + BUTTON.h
+    pointer.x >= BUTTON.x &&
+    pointer.x < BUTTON.x + BUTTON.w &&
+    pointer.y >= BUTTON.y &&
+    pointer.y < BUTTON.y + BUTTON.h
   );
 }
 
@@ -30,8 +31,8 @@ export class TitleScene implements Scene {
 
   public update(dt: number, input: InputFrame): void {
     void dt;
-    this.hovered = pointerInside(input);
-    if (input.pointerPressed && this.hovered && this.host) {
+    this.hovered = pointerInside(input.pointer);
+    if (input.pointer.pressed && this.hovered && this.host) {
       this.host.switchTo("game");
     }
   }

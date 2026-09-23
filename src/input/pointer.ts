@@ -1,5 +1,11 @@
-import type { InputFrame } from "./scene.ts";
-import { VIEW_H, VIEW_W } from "./view.ts";
+import { VIEW_H, VIEW_W } from "../view.ts";
+
+export interface PointerState {
+  x: number;
+  y: number;
+  held: boolean;
+  pressed: boolean;
+}
 
 /** 把指针收成逻辑坐标。按下边沿在本帧 update 读过之后清掉。 */
 export class PointerInput {
@@ -23,12 +29,12 @@ export class PointerInput {
     });
   }
 
-  public snapshot(): InputFrame {
+  public snapshot(): PointerState {
     return {
-      pointerX: this.x,
-      pointerY: this.y,
-      pointerHeld: this.held,
-      pointerPressed: this.pressed,
+      x: this.x,
+      y: this.y,
+      held: this.held,
+      pressed: this.pressed,
     };
   }
 

@@ -1,5 +1,7 @@
 import { SceneDirector } from "./director.ts";
-import { PointerInput } from "./input.ts";
+import { KeyboardInput } from "./input/keyboard.ts";
+import { PointerInput } from "./input/pointer.ts";
+import type { InputFrame } from "./scene.ts";
 import { scenes } from "./scenes/scenes.ts";
 import { VIEW_H, VIEW_W } from "./view.ts";
 
@@ -8,6 +10,7 @@ export class Game {
   public readonly canvas: HTMLCanvasElement;
   public readonly ctx: CanvasRenderingContext2D;
   public readonly pointer: PointerInput;
+  public readonly keyboard: KeyboardInput;
   public readonly director: SceneDirector;
   private lastTime = performance.now();
 
@@ -18,6 +21,7 @@ export class Game {
     this.canvas = canvas;
     this.ctx = ctx;
     this.pointer = new PointerInput(canvas);
+    this.keyboard = new KeyboardInput();
     this.director = new SceneDirector((id) => new scenes[id](), "game");
     this.configureCanvas();
     window.addEventListener("resize", () => this.configureCanvas());
@@ -40,9 +44,13 @@ export class Game {
     const frameDt = (now - this.lastTime) / 1000;
     this.lastTime = now;
 
-    const input = this.pointer.snapshot();
+    const input: InputFrame = {
+      pointer: this.pointer.snapshot(),
+      keyboard: this.keyboard.snapshot(),
+    };
     this.director.advance(frameDt, input);
     this.pointer.acknowledgePressed();
+    this.keyboard.acknowledge();
     this.director.render(this.ctx);
 
     requestAnimationFrame(this.onFrame.bind(this));

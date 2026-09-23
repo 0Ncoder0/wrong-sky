@@ -1,11 +1,12 @@
+import type { KeyboardState } from "./input/keyboard.ts";
+import type { PointerState } from "./input/pointer.ts";
+
 export type SceneId = "title" | "game" | "death" | "ending";
 
-/** 这一帧的输入。按下边沿只在本帧为 true，update 返回后由主循环清掉。 */
+/** 这一帧的输入。边沿只在本帧为 true，update 返回后由主循环清掉。 */
 export interface InputFrame {
-  pointerX: number;
-  pointerY: number;
-  pointerHeld: boolean;
-  pointerPressed: boolean;
+  pointer: PointerState;
+  keyboard: KeyboardState;
 }
 
 export interface SceneHost {
