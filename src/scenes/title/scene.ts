@@ -5,12 +5,7 @@ import { VIEW_H, VIEW_W } from "../../view.ts";
 const BUTTON = { x: (VIEW_W - 270) / 2, y: 321, w: 270, h: 68 };
 
 function pointerInside(pointer: PointerState): boolean {
-  return (
-    pointer.x >= BUTTON.x &&
-    pointer.x < BUTTON.x + BUTTON.w &&
-    pointer.y >= BUTTON.y &&
-    pointer.y < BUTTON.y + BUTTON.h
-  );
+  return pointer.x >= BUTTON.x && pointer.x < BUTTON.x + BUTTON.w && pointer.y >= BUTTON.y && pointer.y < BUTTON.y + BUTTON.h;
 }
 
 /** 标题占位：游戏名和「开始」。点击进入游戏场景。本目录放置标题场景的脚本和资源。 */

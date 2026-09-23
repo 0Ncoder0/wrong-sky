@@ -15,16 +15,16 @@ export class PointerInput {
   private pressed = false;
 
   constructor(canvas: HTMLCanvasElement) {
-    canvas.addEventListener("pointerdown", (event) => {
+    canvas.addEventListener("pointerdown", event => {
       this.held = true;
       this.pressed = true;
       this.track(canvas, event);
     });
-    canvas.addEventListener("pointerup", (event) => {
+    canvas.addEventListener("pointerup", event => {
       this.held = false;
       this.track(canvas, event);
     });
-    canvas.addEventListener("pointermove", (event) => {
+    canvas.addEventListener("pointermove", event => {
       this.track(canvas, event);
     });
   }
@@ -34,7 +34,7 @@ export class PointerInput {
       x: this.x,
       y: this.y,
       held: this.held,
-      pressed: this.pressed,
+      pressed: this.pressed
     };
   }
 

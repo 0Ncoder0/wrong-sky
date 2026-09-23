@@ -24,11 +24,7 @@ export function createIsland(): Terrain[][] {
   for (let ty = 0; ty < MAP_SIZE; ty++) {
     const row: Terrain[] = [];
     for (let tx = 0; tx < MAP_SIZE; tx++) {
-      const sea =
-        tx < SEA_DEPTH ||
-        ty < SEA_DEPTH ||
-        tx >= MAP_SIZE - SEA_DEPTH ||
-        ty >= MAP_SIZE - SEA_DEPTH;
+      const sea = tx < SEA_DEPTH || ty < SEA_DEPTH || tx >= MAP_SIZE - SEA_DEPTH || ty >= MAP_SIZE - SEA_DEPTH;
       row.push(sea ? "sea" : "land");
     }
     rows.push(row);

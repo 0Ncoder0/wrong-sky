@@ -33,12 +33,12 @@ export class KeyboardInput {
     KeyW: new KeyEdgeState(),
     KeyA: new KeyEdgeState(),
     KeyS: new KeyEdgeState(),
-    KeyD: new KeyEdgeState(),
+    KeyD: new KeyEdgeState()
   };
 
   public constructor() {
-    window.addEventListener("keydown", (event) => this.down(event));
-    window.addEventListener("keyup", (event) => this.up(event));
+    window.addEventListener("keydown", event => this.down(event));
+    window.addEventListener("keyup", event => this.up(event));
     window.addEventListener("blur", () => this.releaseAll());
   }
 
@@ -47,7 +47,7 @@ export class KeyboardInput {
       KeyW: this.keys.KeyW.copy(),
       KeyA: this.keys.KeyA.copy(),
       KeyS: this.keys.KeyS.copy(),
-      KeyD: this.keys.KeyD.copy(),
+      KeyD: this.keys.KeyD.copy()
     };
   }
 

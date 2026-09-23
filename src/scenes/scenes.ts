@@ -8,5 +8,5 @@ export const scenes: Record<SceneId, new () => Scene> = {
   title: TitleScene,
   game: GameScene,
   death: DeathScene,
-  ending: EndingScene,
+  ending: EndingScene
 };

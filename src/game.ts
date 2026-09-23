@@ -22,7 +22,7 @@ export class Game {
     this.ctx = ctx;
     this.pointer = new PointerInput(canvas);
     this.keyboard = new KeyboardInput();
-    this.director = new SceneDirector((id) => new scenes[id](), "game");
+    this.director = new SceneDirector(id => new scenes[id](), "game");
     this.configureCanvas();
     window.addEventListener("resize", () => this.configureCanvas());
   }
@@ -46,7 +46,7 @@ export class Game {
 
     const input: InputFrame = {
       pointer: this.pointer.snapshot(),
-      keyboard: this.keyboard.snapshot(),
+      keyboard: this.keyboard.snapshot()
     };
     this.director.advance(frameDt, input);
     this.pointer.acknowledgePressed();

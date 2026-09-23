@@ -35,7 +35,7 @@ export class Building {
 
   public render(ctx: CanvasRenderingContext2D): void {
     const ground = this.footprint();
-    const raised = ground.map((point) => ({ x: point.x, y: point.y - this.wallH }));
+    const raised = ground.map(point => ({ x: point.x, y: point.y - this.wallH }));
     const south = this.bottom(this.tx + this.tilesW - 1, this.ty + this.tilesH - 1);
     let doorEdge: [Point, Point] = null;
     let passedSouth = false;
@@ -58,14 +58,7 @@ export class Building {
     const ty0 = this.ty;
     const tx1 = this.tx + this.tilesW - 1;
     const ty1 = this.ty + this.tilesH - 1;
-    const points = [
-      this.top(tx0, ty0),
-      this.right(tx1, ty0),
-      this.right(tx1, ty1),
-      this.bottom(tx1, ty1),
-      this.left(tx0, ty1),
-      this.left(tx0, ty0),
-    ];
+    const points = [this.top(tx0, ty0), this.right(tx1, ty0), this.right(tx1, ty1), this.bottom(tx1, ty1), this.left(tx0, ty1), this.left(tx0, ty0)];
     const unique: Point[] = [];
     for (const point of points) {
       const prev = unique[unique.length - 1];
@@ -79,7 +72,7 @@ export class Building {
   private top(tx: number, ty: number): Point {
     return {
       x: ORIGIN_X + (tx - ty) * (TILE_W / 2),
-      y: ORIGIN_Y + (tx + ty) * (TILE_H / 2),
+      y: ORIGIN_Y + (tx + ty) * (TILE_H / 2)
     };
   }
 
@@ -121,7 +114,7 @@ export class Building {
     const u1 = 0.5 + width / 2;
     const at = (u: number, v: number) => ({
       x: a.x + (b.x - a.x) * u,
-      y: a.y + (b.y - a.y) * u - v,
+      y: a.y + (b.y - a.y) * u - v
     });
     this.face(ctx, at(u0, 2), at(u1, 2), at(u1, 2 + doorH), at(u0, 2 + doorH), DOOR);
   }
