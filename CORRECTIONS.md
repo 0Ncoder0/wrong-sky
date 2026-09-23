@@ -40,4 +40,31 @@
   - 中文名：**待定**
   - GitHub 与本地目录同步更名
 
+### 2026-09-22 — 概念图与美术方向
+
+- **类型：** 新增想法
+- **涉及：** 无，新增 `docs/art/`
+- **内容：**
+  - 主视觉：`docs/art/key-visual.jpg`（等距、轻科幻漫画风、小岛+海边界、无皮带）
+  - 生成提示词：`docs/art/key-visual-prompt.md`
+  - 美术意向：cozy soft sci-fi / picture-book，非重工业、非赛博、非写实
+
+### 2026-09-23 — 概念图提示词 v2（少卡通）
+
+- **类型：** 补充
+- **涉及：** `docs/art/key-visual-prompt.md`；`key-visual.jpg` 仍为 v1 对照
+- **内容：** 美术方向改为 mature cozy / editorial illustration：细线、降饱和、建筑更像考察设备、敌人偏几何/硬壳、UI 更偏 indie PC；保留无皮带、轻科幻、等距。v1 原文留在同文件底部。
+
+### 2026-09-23 — 收录概念图 v2，与 v1 并存
+
+- **类型：** 补充
+- **涉及：** `docs/art/key-visual-v1.jpg`、`docs/art/key-visual-v2.jpg`、README
+- **内容：** v2 定为当前视觉方向；v1 保留作对照。原 `key-visual.jpg` 重命名为 `key-visual-v1.jpg`。
+
+### 2026-09-23 — 概念图升级为高清 PNG
+
+- **类型：** 补充
+- **涉及：** `docs/art/key-visual-v1.png`、`docs/art/key-visual-v2.png`
+- **内容：** 以高清 PNG（约 1672×941）替换原 JPG；README / 提示词链接改为 `.png`。
+
 （其后修正与新增想法请继续追加。）
