@@ -25,8 +25,7 @@ export class GameScene implements Scene {
   public exit(): void {}
 
   public update(dt: number, input: InputFrame): void {
-    void dt;
-    void input;
+    this.player.update(dt, input.keyboard, this.tiles);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
