@@ -10,11 +10,13 @@ import {
   traceDiamond,
   type Terrain,
 } from "./map.ts";
+import { Player } from "./player.ts";
 
 /** 游戏场景。本目录放置局内脚本和资源。 */
 export class GameScene implements Scene {
   public readonly id = "game" as const;
   private readonly tiles: Terrain[][] = createIsland();
+  private readonly player = new Player();
 
   public enter(host: SceneHost): void {
     void host;
@@ -44,5 +46,7 @@ export class GameScene implements Scene {
       traceDiamond(ctx, tx, ty);
       ctx.stroke();
     });
+
+    this.player.render(ctx);
   }
 }
