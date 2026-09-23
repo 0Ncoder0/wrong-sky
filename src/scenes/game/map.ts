@@ -70,3 +70,23 @@ export function traceDiamond(ctx: CanvasRenderingContext2D, tx: number, ty: numb
   ctx.lineTo(x - halfW, y + halfH);
   ctx.closePath();
 }
+
+/** 先铺海，再填菱形，最后描网格。填色会盖住半条线，所以网格单独再描一遍。 */
+export function drawTerrain(ctx: CanvasRenderingContext2D, tiles: Terrain[][]): void {
+  ctx.fillStyle = SEA_COLOR;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+  forEachTile((tx, ty) => {
+    traceDiamond(ctx, tx, ty);
+    ctx.fillStyle = isLand(tiles, tx, ty) ? LAND_COLOR : SEA_COLOR;
+    ctx.fill();
+  });
+
+  ctx.strokeStyle = GRID_COLOR;
+  ctx.lineWidth = 1;
+  ctx.lineJoin = "miter";
+  forEachTile((tx, ty) => {
+    traceDiamond(ctx, tx, ty);
+    ctx.stroke();
+  });
+}
