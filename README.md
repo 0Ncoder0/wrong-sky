@@ -3,7 +3,7 @@
 > 英文名：**Wrong Sky** · 仓库：`wrong-sky` · 中文名待定
 
 异星坠毁题材的轻度游戏：**简化工厂（无物流）+ 塔防守家 + 线索叙事 + 多结局**。  
-面向轻度玩家 / 摸鱼向；技术意向为 TypeScript + Canvas 自研（未开工定稿）。
+**Isometric 2D**（2D 精灵等距镜头，非真 3D）。面向轻度玩家 / 摸鱼向；技术意向为 TypeScript + Canvas 自研（`mvp` 沙盒已脚手架）。
 
 ## 概念图
 
@@ -25,10 +25,11 @@
 | [IDEAS.md](./IDEAS.md) | **想法**全文初稿。定稿后禁止修改。 |
 | [CORRECTIONS.md](./CORRECTIONS.md) | **修正与增量**：调整旧想法，或追加全新想法；只增不减，条目带日期。 |
 | [MVP.md](./MVP.md) | **第一版范围**：必须做 / 不做 / 完成定义；与 IDEAS 冲突时以本文件为准做第一版。 |
+| [docs/mvp-steps.md](./docs/mvp-steps.md) | **实现步骤**：按能力点拆分的顺序与验收（仅指导 `mvp` 分支）。 |
 | [docs/art/](./docs/art/) | 概念图与美术提示词 |
 
 
-阅读顺序：`IDEAS.md`（愿景）→ `MVP.md`（当前只做什么）→ `CORRECTIONS.md`（按日期的增量）。
+阅读顺序：`IDEAS.md`（愿景）→ `MVP.md`（做什么）→ `docs/mvp-steps.md`（按什么顺序做）→ `CORRECTIONS.md`（增量）。
 
 ## 分支约定
 
