@@ -36,6 +36,20 @@
 - **`mvp`：** 能力与玩法验证沙盒；**不合回 `master`**。
 - 暂不设 **`develop`**。细则见 [CORRECTIONS.md](./CORRECTIONS.md)（2026-09-23 条目）。
 
+## 开发（`mvp`）
+
+- Node：**24**（见 `.nvmrc` / `package.json` → `engines`）
+- 包管理：npm
+- 工具：Vite + TypeScript + Canvas
+
+```bash
+nvm use   # 或确保 Node 24
+npm install
+npm run dev      # 开发：空 Canvas + rAF 转圈
+npm run build    # 产出 dist/
+npm run preview  # 预览构建结果
+```
+
 ## 一句话卖点（摘自想法）
 
 不用铺传送带的异星基地：口袋/仓库全局库存、建筑表控产、用电招怪、自动守家；中期线索解密世界；默认通关为化学引擎飞走（导航 + 休眠仓），另有治星/殖民/彩蛋等分支。
