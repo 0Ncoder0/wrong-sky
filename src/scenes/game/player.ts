@@ -2,9 +2,6 @@ import type { KeyboardState } from "../../input/keyboard.ts";
 import type { Building } from "./building.ts";
 import { ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W, type TileMap } from "./tile-map.ts";
 
-const BODY_W = 10;
-const BODY_H = 20;
-const HEAD_R = 5;
 const STEP_INTERVAL = 0.16;
 
 /** 格子中心之间匀速走。当前这段走完才响应新的方向。 */
@@ -47,23 +44,7 @@ export class Player {
 
   public render(ctx: CanvasRenderingContext2D): void {
     const tile = this.drawTile();
-    const footX = ORIGIN_X + (tile.tx - tile.ty) * (TILE_W / 2);
-    const footY = ORIGIN_Y + (tile.tx + tile.ty) * (TILE_H / 2) + TILE_H / 2;
-    const bodyTop = footY - BODY_H;
-
-    ctx.fillStyle = "#c4564a";
-    ctx.fillRect(footX - BODY_W / 2, bodyTop, BODY_W, BODY_H);
-
-    ctx.beginPath();
-    ctx.arc(footX, bodyTop - HEAD_R + 1, HEAD_R, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = "#1a1814";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(footX - BODY_W / 2, bodyTop, BODY_W, BODY_H);
-    ctx.beginPath();
-    ctx.arc(footX, bodyTop - HEAD_R + 1, HEAD_R, 0, Math.PI * 2);
-    ctx.stroke();
+    PlayerRenderer.render(ctx, tile.tx, tile.ty);
   }
 
   private drawTile(): { tx: number; ty: number } {
@@ -104,5 +85,38 @@ export class Player {
     if (left) return { tx: -1, ty: 1 };
     if (right) return { tx: 1, ty: -1 };
     return null;
+  }
+}
+
+const BODY_W = 10;
+const BODY_H = 20;
+const HEAD_R = 5;
+const BODY = "#c4564a";
+const OUTLINE = "#1a1814";
+
+class PlayerRenderer {
+  public static render(ctx: CanvasRenderingContext2D, tx: number, ty: number): void {
+    const foot = this.foot(tx, ty);
+    const bodyTop = foot.y - BODY_H;
+    ctx.fillStyle = BODY;
+    ctx.fillRect(foot.x - BODY_W / 2, bodyTop, BODY_W, BODY_H);
+
+    ctx.beginPath();
+    ctx.arc(foot.x, bodyTop - HEAD_R + 1, HEAD_R, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(foot.x - BODY_W / 2, bodyTop, BODY_W, BODY_H);
+    ctx.beginPath();
+    ctx.arc(foot.x, bodyTop - HEAD_R + 1, HEAD_R, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  private static foot(tx: number, ty: number): { x: number; y: number } {
+    return {
+      x: ORIGIN_X + (tx - ty) * (TILE_W / 2),
+      y: ORIGIN_Y + (tx + ty) * (TILE_H / 2) + TILE_H / 2
+    };
   }
 }

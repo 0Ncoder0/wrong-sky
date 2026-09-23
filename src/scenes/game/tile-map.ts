@@ -44,24 +44,8 @@ export class TileMap {
     return { tx, ty };
   }
 
-  /** 先铺海，再填菱形，最后描网格。填色会盖住半条线，所以网格单独再描一遍。 */
   public render(ctx: CanvasRenderingContext2D): void {
-    ctx.fillStyle = SEA_COLOR;
-    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-
-    forEachTile((tx, ty) => {
-      traceDiamond(ctx, tx, ty);
-      ctx.fillStyle = this.isLand(tx, ty) ? LAND_COLOR : SEA_COLOR;
-      ctx.fill();
-    });
-
-    ctx.strokeStyle = GRID_COLOR;
-    ctx.lineWidth = 1;
-    ctx.lineJoin = "miter";
-    forEachTile((tx, ty) => {
-      traceDiamond(ctx, tx, ty);
-      ctx.stroke();
-    });
+    TileMapRenderer.render(ctx, this.tiles);
   }
 }
 
@@ -78,24 +62,52 @@ function createIsland(): Terrain[][] {
   return rows;
 }
 
-/** 按 tx+ty 从远到近。平地现在看不出遮挡，以后人和建筑沿用这个顺序。 */
-function forEachTile(visit: (tx: number, ty: number) => void): void {
-  for (let sum = 0; sum < MAP_SIZE * 2 - 1; sum++) {
-    const txStart = Math.max(0, sum - (MAP_SIZE - 1));
-    const txEnd = Math.min(sum, MAP_SIZE - 1);
-    for (let tx = txStart; tx <= txEnd; tx++) visit(tx, sum - tx);
+/** 先铺海，再填菱形，最后描网格。填色会盖住半条线，所以网格单独再描一遍。 */
+class TileMapRenderer {
+  public static render(ctx: CanvasRenderingContext2D, tiles: Terrain[][]): void {
+    ctx.fillStyle = SEA_COLOR;
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    this.fill(ctx, tiles);
+    this.grid(ctx);
   }
-}
 
-function traceDiamond(ctx: CanvasRenderingContext2D, tx: number, ty: number): void {
-  const x = ORIGIN_X + (tx - ty) * (TILE_W / 2);
-  const y = ORIGIN_Y + (tx + ty) * (TILE_H / 2);
-  const halfW = TILE_W / 2;
-  const halfH = TILE_H / 2;
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(x + halfW, y + halfH);
-  ctx.lineTo(x, y + TILE_H);
-  ctx.lineTo(x - halfW, y + halfH);
-  ctx.closePath();
+  private static fill(ctx: CanvasRenderingContext2D, tiles: Terrain[][]): void {
+    this.forEachTile((tx, ty) => {
+      this.traceDiamond(ctx, tx, ty);
+      ctx.fillStyle = tiles[ty][tx] === "land" ? LAND_COLOR : SEA_COLOR;
+      ctx.fill();
+    });
+  }
+
+  private static grid(ctx: CanvasRenderingContext2D): void {
+    ctx.strokeStyle = GRID_COLOR;
+    ctx.lineWidth = 1;
+    ctx.lineJoin = "miter";
+    this.forEachTile((tx, ty) => {
+      this.traceDiamond(ctx, tx, ty);
+      ctx.stroke();
+    });
+  }
+
+  /** 按 tx+ty 从远到近。平地现在看不出遮挡，以后人和建筑沿用这个顺序。 */
+  private static forEachTile(visit: (tx: number, ty: number) => void): void {
+    for (let sum = 0; sum < MAP_SIZE * 2 - 1; sum++) {
+      const txStart = Math.max(0, sum - (MAP_SIZE - 1));
+      const txEnd = Math.min(sum, MAP_SIZE - 1);
+      for (let tx = txStart; tx <= txEnd; tx++) visit(tx, sum - tx);
+    }
+  }
+
+  private static traceDiamond(ctx: CanvasRenderingContext2D, tx: number, ty: number): void {
+    const x = ORIGIN_X + (tx - ty) * (TILE_W / 2);
+    const y = ORIGIN_Y + (tx + ty) * (TILE_H / 2);
+    const halfW = TILE_W / 2;
+    const halfH = TILE_H / 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + halfW, y + halfH);
+    ctx.lineTo(x, y + TILE_H);
+    ctx.lineTo(x - halfW, y + halfH);
+    ctx.closePath();
+  }
 }
