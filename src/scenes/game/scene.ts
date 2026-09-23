@@ -1,7 +1,8 @@
 import type { InputFrame, Scene, SceneHost } from "../../scene.ts";
 import { VIEW_H, VIEW_W } from "../../view.ts";
-import { createIsland, forEachTile, GRID_COLOR, HOVER_COLOR, isLand, LAND_COLOR, SEA_COLOR, tileAt, traceDiamond, type Terrain } from "./map.ts";
+import { createIsland, forEachTile, GRID_COLOR, isLand, LAND_COLOR, SEA_COLOR, tileAt, traceDiamond, type Terrain } from "./map.ts";
 import { Building } from "./building.ts";
+import { GhostBuilding } from "./ghost-building.ts";
 import { Player } from "./player.ts";
 
 /** 游戏场景。本目录放置局内脚本和资源。 */
@@ -10,7 +11,7 @@ export class GameScene implements Scene {
   private readonly tiles: Terrain[][] = createIsland();
   private readonly player = new Player();
   private readonly buildings = [new Building(12, 14, 2, 1, 16), new Building(20, 14, 2, 2, 28), new Building(16, 22, 3, 3, 40)];
-  private hover: { tx: number; ty: number } | null = null;
+  private readonly ghost = new GhostBuilding();
 
   public enter(host: SceneHost): void {
     void host;
@@ -20,7 +21,7 @@ export class GameScene implements Scene {
 
   public update(dt: number, input: InputFrame): void {
     this.player.update(dt, input.keyboard, this.tiles, this.buildings);
-    this.hover = tileAt(input.pointer.x, input.pointer.y);
+    this.ghost.follow(tileAt(input.pointer.x, input.pointer.y), this.tiles, this.buildings, this.player);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
@@ -41,14 +42,8 @@ export class GameScene implements Scene {
       ctx.stroke();
     });
 
-    if (this.hover) {
-      traceDiamond(ctx, this.hover.tx, this.hover.ty);
-      ctx.fillStyle = HOVER_COLOR;
-      ctx.fill();
-      ctx.stroke();
-    }
-
-    const sprites = [...this.buildings, this.player];
+    const sprites: { depth(): number; render(ctx: CanvasRenderingContext2D): void }[] = [...this.buildings, this.player];
+    if (this.ghost.isShown()) sprites.push(this.ghost);
     sprites.sort((a, b) => a.depth() - b.depth());
     for (const sprite of sprites) sprite.render(ctx);
   }

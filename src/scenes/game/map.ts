@@ -10,8 +10,6 @@ export const SEA_DEPTH = 2;
 export const SEA_COLOR = "#4e8d98";
 export const LAND_COLOR = "#b7a47a";
 export const GRID_COLOR = "#8e8a80";
-/** 悬停格叠在地砖上。陆地和海都要能看出来。 */
-export const HOVER_COLOR = "rgba(255, 236, 180, 0.45)";
 
 const MAP_PX_H = MAP_SIZE * TILE_H;
 

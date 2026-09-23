@@ -15,6 +15,12 @@ export class Player {
   private to: { tx: number; ty: number } = null;
   private moveT = 0;
 
+  /** 当前格，以及正在走入的那一格。 */
+  public occupies(tx: number, ty: number): boolean {
+    if (this.tx === tx && this.ty === ty) return true;
+    return this.to != null && this.to.tx === tx && this.to.ty === ty;
+  }
+
   /** 用插值后的位置。平地不挡人，以后建筑按这个数决定谁盖住谁。 */
   public depth(): number {
     const tile = this.drawTile();
