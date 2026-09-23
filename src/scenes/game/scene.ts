@@ -32,17 +32,23 @@ export class GameScene implements Scene {
     if (input.keyboard.KeyR.pressed) this.tool = this.tool === "remove" ? null : "remove";
 
     this.player.update(dt, input.keyboard, this.map, this.buildings);
+    this.onMove(input);
     if (this.tool === "build") this.onBuild(input);
     else this.ghost = null;
     if (this.tool === "remove") this.onRemove(input);
     else this.clearRemoving();
   }
 
+  private onMove(input: InputFrame): void {
+    if (!input.pointer.right.pressed) return;
+    this.player.setGoal(this.map.tileAt(input.pointer.x, input.pointer.y), this.map, this.buildings);
+  }
+
   private onBuild(input: InputFrame): void {
     if (this.ghost == null) this.ghost = new GhostBuilding();
     const tile = this.map.tileAt(input.pointer.x, input.pointer.y);
     this.ghost.follow(tile, this.map, this.buildings, this.player);
-    if (!input.pointer.pressed) return;
+    if (!input.pointer.left.pressed) return;
     const placed = this.ghost.commit();
     if (!placed) return;
     this.buildings.push(placed);
@@ -57,7 +63,7 @@ export class GameScene implements Scene {
     const target = this.buildings.find(building => building.occupies(tile.tx, tile.ty)) ?? null;
     if (target == null) return;
     target.removing = true;
-    if (!input.pointer.pressed) return;
+    if (!input.pointer.left.pressed) return;
     const index = this.buildings.indexOf(target);
     if (index >= 0) this.buildings.splice(index, 1);
   }

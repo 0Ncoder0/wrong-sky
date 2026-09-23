@@ -27,7 +27,7 @@ export class TitleScene implements Scene {
   public update(dt: number, input: InputFrame): void {
     void dt;
     this.hovered = pointerInside(input.pointer);
-    if (input.pointer.pressed && this.hovered && this.host) {
+    if (input.pointer.left.pressed && this.hovered && this.host) {
       this.host.switchTo("game");
     }
   }

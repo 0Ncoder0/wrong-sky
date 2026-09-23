@@ -9,6 +9,8 @@ export class Player {
   public readonly id = "player";
   public tx = 16;
   public ty = 16;
+  /** 右键指定的那一格。 */
+  private goal: { tx: number; ty: number } | null = null;
   private to: { tx: number; ty: number } = null;
   private moveT = 0;
 
@@ -22,6 +24,18 @@ export class Player {
   public depth(): number {
     const tile = this.drawTile();
     return tile.tx + tile.ty;
+  }
+
+  /** 脚下清掉。海上、房子上、地图外保持原目标。 */
+  public setGoal(tile: { tx: number; ty: number } | null, map: TileMap, buildings: Building[]): void {
+    if (tile == null) return;
+    if (tile.tx === this.tx && tile.ty === this.ty) {
+      this.goal = null;
+      return;
+    }
+    if (!map.isLand(tile.tx, tile.ty)) return;
+    if (buildings.some(building => building.occupies(tile.tx, tile.ty))) return;
+    this.goal = tile;
   }
 
   public update(dt: number, keyboard: KeyboardState, map: TileMap, buildings: Building[]): void {
@@ -45,6 +59,7 @@ export class Player {
   public render(ctx: CanvasRenderingContext2D): void {
     const tile = this.drawTile();
     PlayerRenderer.render(ctx, tile.tx, tile.ty);
+    if (this.goal) GoalRenderer.render(ctx, this.goal.tx, this.goal.ty);
   }
 
   private drawTile(): { tx: number; ty: number } {
@@ -118,5 +133,25 @@ class PlayerRenderer {
       x: ORIGIN_X + (tx - ty) * (TILE_W / 2),
       y: ORIGIN_Y + (tx + ty) * (TILE_H / 2) + TILE_H / 2
     };
+  }
+}
+
+const GOAL = "#e2b340";
+
+class GoalRenderer {
+  public static render(ctx: CanvasRenderingContext2D, tx: number, ty: number): void {
+    const x = ORIGIN_X + (tx - ty) * (TILE_W / 2);
+    const y = ORIGIN_Y + (tx + ty) * (TILE_H / 2);
+    const halfW = TILE_W / 2;
+    const halfH = TILE_H / 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + halfW, y + halfH);
+    ctx.lineTo(x, y + TILE_H);
+    ctx.lineTo(x - halfW, y + halfH);
+    ctx.closePath();
+    ctx.strokeStyle = GOAL;
+    ctx.lineWidth = 2;
+    ctx.stroke();
   }
 }
