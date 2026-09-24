@@ -1,6 +1,6 @@
-import { BUILDING_COLORS, Building, BuildingRenderer, type BuildingColors } from "./building.ts";
+import { BUILDING_COLORS, Building, BuildingRenderer, buildingDepth, type BuildingBox, type BuildingColors } from "./building.ts";
 import type { Player } from "./player.ts";
-import { TILE_H, Iso } from "./iso.ts";
+import { TILE_H } from "./iso.ts";
 import type { TileMap } from "./tile-map.ts";
 
 const BAD = "#c43c3c";
@@ -13,9 +13,7 @@ const BAD_COLORS: BuildingColors = {
   outline: BUILDING_COLORS.outline
 };
 
-const TILES_W = 2;
-const TILES_H = 2;
-const WALL_H = TILE_H * 2;
+const SIZE = { tilesW: 2, tilesH: 2, wallH: TILE_H * 2 };
 
 /** 跟着指针的预览房子。不占路，脚印不合法时整栋用同一种红。 */
 export class GhostBuilding {
@@ -43,25 +41,29 @@ export class GhostBuilding {
   public commit(): Building | null {
     if (!this.shown || !this.ok) return null;
     this.ok = false;
-    return new Building(this.tx, this.ty, TILES_W, TILES_H, WALL_H);
+    return new Building(this.box());
   }
 
-  /** 靠画面前的那一角。和实体建筑用同一个深度。 */
   public depth(): number {
-    return Iso.depth(this.tx + TILES_W - 1, this.ty + TILES_H - 1);
+    return buildingDepth(this.box());
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
     if (!this.shown) return;
     ctx.save();
     ctx.globalAlpha = ALPHA;
-    BuildingRenderer.render(ctx, this.tx, this.ty, TILES_W, TILES_H, WALL_H, this.ok ? BUILDING_COLORS : BAD_COLORS);
+    BuildingRenderer.render(ctx, this.box(), this.ok ? BUILDING_COLORS : BAD_COLORS);
     ctx.restore();
   }
 
+  private box(): BuildingBox {
+    return { tx: this.tx, ty: this.ty, ...SIZE };
+  }
+
   private canPlace(map: TileMap, buildings: Building[], player: Player): boolean {
-    for (let ty = this.ty; ty < this.ty + TILES_H; ty++) {
-      for (let tx = this.tx; tx < this.tx + TILES_W; tx++) {
+    const box = this.box();
+    for (let ty = box.ty; ty < box.ty + box.tilesH; ty++) {
+      for (let tx = box.tx; tx < box.tx + box.tilesW; tx++) {
         if (!map.isLand(tx, ty)) return false;
         if (buildings.some(building => building.occupies(tx, ty))) return false;
         if (player.occupies(tx, ty)) return false;

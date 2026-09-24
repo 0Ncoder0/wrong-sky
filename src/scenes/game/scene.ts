@@ -16,7 +16,7 @@ export class GameScene implements Scene {
   public readonly id = "game" as const;
   private readonly map = new TileMap();
   private readonly player = new Player();
-  private readonly buildings = [new Building(12, 14, 2, 1, 16), new Building(20, 14, 2, 2, 28), new Building(16, 22, 3, 3, 40)];
+  private readonly buildings = [new Building({ tx: 12, ty: 14, tilesW: 2, tilesH: 1, wallH: 16 }), new Building({ tx: 20, ty: 14, tilesW: 2, tilesH: 2, wallH: 28 }), new Building({ tx: 16, ty: 22, tilesW: 3, tilesH: 3, wallH: 40 })];
   private ghost: GhostBuilding = null;
   /** 当前工具。建造和删除共用这一个字段。 */
   private tool: Tool | null = null;
