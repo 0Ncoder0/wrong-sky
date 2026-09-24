@@ -1,7 +1,8 @@
 import type { KeyboardState } from "../../input/keyboard.ts";
 import type { PointerState } from "../../input/pointer.ts";
 import type { Building } from "./building.ts";
-import { ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W, type TileMap } from "./tile-map.ts";
+import { Iso } from "./iso.ts";
+import type { TileMap } from "./tile-map.ts";
 
 const STEP_INTERVAL = 0.16;
 
@@ -24,7 +25,7 @@ export class Player {
   /** 用插值后的位置。平地不挡人，以后建筑按这个数决定谁盖住谁。 */
   public depth(): number {
     const tile = this.drawTile();
-    return tile.tx + tile.ty;
+    return Iso.depth(tile.tx, tile.ty);
   }
 
   /** 脚下清掉。海上、房子上、地图外保持原目标。 */
@@ -175,7 +176,7 @@ const OUTLINE = "#1a1814";
 
 class PlayerRenderer {
   public static render(ctx: CanvasRenderingContext2D, tx: number, ty: number): void {
-    const foot = this.foot(tx, ty);
+    const foot = Iso.center(tx, ty);
     const bodyTop = foot.y - BODY_H;
     ctx.fillStyle = BODY;
     ctx.fillRect(foot.x - BODY_W / 2, bodyTop, BODY_W, BODY_H);
@@ -191,29 +192,13 @@ class PlayerRenderer {
     ctx.arc(foot.x, bodyTop - HEAD_R + 1, HEAD_R, 0, Math.PI * 2);
     ctx.stroke();
   }
-
-  private static foot(tx: number, ty: number): { x: number; y: number } {
-    return {
-      x: ORIGIN_X + (tx - ty) * (TILE_W / 2),
-      y: ORIGIN_Y + (tx + ty) * (TILE_H / 2) + TILE_H / 2
-    };
-  }
 }
 
 const GOAL = "#e2b340";
 
 class GoalRenderer {
   public static render(ctx: CanvasRenderingContext2D, tx: number, ty: number): void {
-    const x = ORIGIN_X + (tx - ty) * (TILE_W / 2);
-    const y = ORIGIN_Y + (tx + ty) * (TILE_H / 2);
-    const halfW = TILE_W / 2;
-    const halfH = TILE_H / 2;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + halfW, y + halfH);
-    ctx.lineTo(x, y + TILE_H);
-    ctx.lineTo(x - halfW, y + halfH);
-    ctx.closePath();
+    Iso.traceDiamond(ctx, tx, ty);
     ctx.strokeStyle = GOAL;
     ctx.lineWidth = 2;
     ctx.stroke();

@@ -1,6 +1,7 @@
 import { BUILDING_COLORS, Building, BuildingRenderer, type BuildingColors } from "./building.ts";
 import type { Player } from "./player.ts";
-import { TILE_H, type TileMap } from "./tile-map.ts";
+import { TILE_H, Iso } from "./iso.ts";
+import type { TileMap } from "./tile-map.ts";
 
 const BAD = "#c43c3c";
 const ALPHA = 0.65;
@@ -47,7 +48,7 @@ export class GhostBuilding {
 
   /** 靠画面前的那一角。和实体建筑用同一个深度。 */
   public depth(): number {
-    return this.tx + TILES_W - 1 + (this.ty + TILES_H - 1);
+    return Iso.depth(this.tx + TILES_W - 1, this.ty + TILES_H - 1);
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

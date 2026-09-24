@@ -1,4 +1,4 @@
-import { ORIGIN_X, ORIGIN_Y, TILE_H, TILE_W } from "./tile-map.ts";
+import { Iso, type Point } from "./iso.ts";
 
 const LEFT_WALL = "#5e6a72";
 const RIGHT_WALL = "#8d9aa1";
@@ -25,8 +25,6 @@ const DEMOLISH_COLORS: BuildingColors = {
   outline: BUILDING_COLORS.outline
 };
 
-type Point = { x: number; y: number };
-
 /** 占一块矩形地的盒子。墙高决定它能挡住人的多少，门在朝左的那面墙上。 */
 export class Building {
   public readonly tx: number;
@@ -47,7 +45,7 @@ export class Building {
 
   /** 靠画面前的那一角。整栋房子按这个深度一次画完。 */
   public depth(): number {
-    return this.tx + this.tilesW - 1 + (this.ty + this.tilesH - 1);
+    return Iso.depth(this.tx + this.tilesW - 1, this.ty + this.tilesH - 1);
   }
 
   public occupies(tx: number, ty: number): boolean {
@@ -65,7 +63,7 @@ export class BuildingRenderer {
   public static render(ctx: CanvasRenderingContext2D, tx: number, ty: number, tilesW: number, tilesH: number, wallH: number, colors: BuildingColors): void {
     const ground = this.footprint(tx, ty, tilesW, tilesH);
     const raised = ground.map(point => ({ x: point.x, y: point.y - wallH }));
-    const south = this.bottom(tx + tilesW - 1, ty + tilesH - 1);
+    const south = Iso.bottom(tx + tilesW - 1, ty + tilesH - 1);
     let doorEdge: [Point, Point] = null;
     let passedSouth = false;
 
@@ -85,7 +83,7 @@ export class BuildingRenderer {
   private static footprint(tx: number, ty: number, tilesW: number, tilesH: number): Point[] {
     const tx1 = tx + tilesW - 1;
     const ty1 = ty + tilesH - 1;
-    const points = [this.top(tx, ty), this.right(tx1, ty), this.right(tx1, ty1), this.bottom(tx1, ty1), this.left(tx, ty1), this.left(tx, ty)];
+    const points = [Iso.top(tx, ty), Iso.right(tx1, ty), Iso.right(tx1, ty1), Iso.bottom(tx1, ty1), Iso.left(tx, ty1), Iso.left(tx, ty)];
     const unique: Point[] = [];
     for (const point of points) {
       const prev = unique[unique.length - 1];
@@ -94,28 +92,6 @@ export class BuildingRenderer {
     }
     if (unique.length > 1 && this.same(unique[0], unique[unique.length - 1])) unique.pop();
     return this.dropCollinear(unique);
-  }
-
-  private static top(tx: number, ty: number): Point {
-    return {
-      x: ORIGIN_X + (tx - ty) * (TILE_W / 2),
-      y: ORIGIN_Y + (tx + ty) * (TILE_H / 2)
-    };
-  }
-
-  private static right(tx: number, ty: number): Point {
-    const point = this.top(tx, ty);
-    return { x: point.x + TILE_W / 2, y: point.y + TILE_H / 2 };
-  }
-
-  private static bottom(tx: number, ty: number): Point {
-    const point = this.top(tx, ty);
-    return { x: point.x, y: point.y + TILE_H };
-  }
-
-  private static left(tx: number, ty: number): Point {
-    const point = this.top(tx, ty);
-    return { x: point.x - TILE_W / 2, y: point.y + TILE_H / 2 };
   }
 
   private static door(ctx: CanvasRenderingContext2D, a: Point, b: Point, tilesW: number, wallH: number, color: string, outline: string): void {

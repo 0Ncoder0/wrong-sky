@@ -1,21 +1,16 @@
 import { VIEW_H, VIEW_W } from "../../view.ts";
+import { Iso } from "./iso.ts";
 
-/** 32×32。砖 32×16 时整图 1024×512，能放进 1080×608。 */
+/** 32×32。投影按这个边长把整张岛放进画面。 */
 export const MAP_SIZE = 32;
-export const TILE_W = 32;
-export const TILE_H = 16;
 /** 外圈这么多格是海。1 格在这个砖高下几乎看不出边界。 */
 export const SEA_DEPTH = 2;
+
+Iso.placeOrigin(MAP_SIZE);
 
 const SEA_COLOR = "#4e8d98";
 const LAND_COLOR = "#b7a47a";
 const GRID_COLOR = "#8e8a80";
-
-const MAP_PX_H = MAP_SIZE * TILE_H;
-
-/** 上顶点。水平居中，垂直把整张岛放在画面里。 */
-export const ORIGIN_X = VIEW_W / 2;
-export const ORIGIN_Y = (VIEW_H - MAP_PX_H) / 2;
 
 type Terrain = "land" | "sea";
 
@@ -32,16 +27,11 @@ export class TileMap {
     return this.tiles[ty][tx] === "land";
   }
 
-  /** 屏幕点落在哪一格。原点是 (0,0) 的上顶点；地图外返回 null。 */
+  /** 屏幕点落在哪一格。地图外返回 null。 */
   public tileAt(x: number, y: number): { tx: number; ty: number } | null {
-    const halfW = TILE_W / 2;
-    const halfH = TILE_H / 2;
-    const rx = x - ORIGIN_X;
-    const ry = y - ORIGIN_Y;
-    const tx = Math.floor((ry / halfH + rx / halfW) / 2);
-    const ty = Math.floor((ry / halfH - rx / halfW) / 2);
-    if (tx < 0 || ty < 0 || tx >= MAP_SIZE || ty >= MAP_SIZE) return null;
-    return { tx, ty };
+    const tile = Iso.tileOf(x, y);
+    if (tile.tx < 0 || tile.ty < 0 || tile.tx >= MAP_SIZE || tile.ty >= MAP_SIZE) return null;
+    return tile;
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
@@ -73,7 +63,7 @@ class TileMapRenderer {
 
   private static fill(ctx: CanvasRenderingContext2D, tiles: Terrain[][]): void {
     this.forEachTile((tx, ty) => {
-      this.traceDiamond(ctx, tx, ty);
+      Iso.traceDiamond(ctx, tx, ty);
       ctx.fillStyle = tiles[ty][tx] === "land" ? LAND_COLOR : SEA_COLOR;
       ctx.fill();
     });
@@ -84,7 +74,7 @@ class TileMapRenderer {
     ctx.lineWidth = 1;
     ctx.lineJoin = "miter";
     this.forEachTile((tx, ty) => {
-      this.traceDiamond(ctx, tx, ty);
+      Iso.traceDiamond(ctx, tx, ty);
       ctx.stroke();
     });
   }
@@ -96,18 +86,5 @@ class TileMapRenderer {
       const txEnd = Math.min(sum, MAP_SIZE - 1);
       for (let tx = txStart; tx <= txEnd; tx++) visit(tx, sum - tx);
     }
-  }
-
-  private static traceDiamond(ctx: CanvasRenderingContext2D, tx: number, ty: number): void {
-    const x = ORIGIN_X + (tx - ty) * (TILE_W / 2);
-    const y = ORIGIN_Y + (tx + ty) * (TILE_H / 2);
-    const halfW = TILE_W / 2;
-    const halfH = TILE_H / 2;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + halfW, y + halfH);
-    ctx.lineTo(x, y + TILE_H);
-    ctx.lineTo(x - halfW, y + halfH);
-    ctx.closePath();
   }
 }
